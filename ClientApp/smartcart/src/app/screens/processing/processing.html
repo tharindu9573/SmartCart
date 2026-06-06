@@ -1,0 +1,16 @@
+<div class="tablet">
+  <div class="processing-center">
+    <div class="spinner-ring"></div>
+    <div class="proc-title">Processing...</div>
+
+    @if (card) {
+      <div class="card-chip" style="max-width: 340px;">
+        <div class="chip-label">Card Detected</div>
+        <div class="card-num">{{ card.maskedCardNumber }}</div>
+        <div class="card-meta">{{ card.holderName }} &nbsp;|&nbsp; Exp {{ card.expiry }}</div>
+      </div>
+    }
+
+    <div class="proc-hint">Please wait — do not remove your card</div>
+  </div>
+</div>

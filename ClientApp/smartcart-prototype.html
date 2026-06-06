@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartCart — Prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ─── RESET ───────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ─── VIEWER SHELL ────────────────────────────────── */
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #0d1117;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px 28px;
+  color: #111827;
+  user-select: none;
+}
+
+.viewer-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 28px;
+}
+.viewer-title span { color: #60a5fa; }
+
+.nav-row {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.nav-btn {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
+  color: rgba(255,255,255,0.7);
+  font-size: 24px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s, opacity 0.15s;
+  line-height: 1;
+}
+.nav-btn:hover:not(:disabled) { background: rgba(255,255,255,0.13); }
+.nav-btn:disabled { opacity: 0.18; cursor: default; }
+
+/* ─── SCREEN SWITCHER ─────────────────────────────── */
+.screens { position: relative; }
+.screen  { display: none; }
+.screen.active { display: block; }
+
+/* ─── FOOTER ──────────────────────────────────────── */
+.viewer-footer {
+  margin-top: 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.screen-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.45);
+  min-height: 18px;
+}
+.dots { display: flex; gap: 5px; align-items: center; }
+.dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.18);
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.dot.active { background: #60a5fa; width: 18px; border-radius: 3px; }
+.key-hint { font-size: 10px; color: rgba(255,255,255,0.2); letter-spacing: 0.5px; margin-top: 2px; }
+
+/* ─── TABLET FRAME ────────────────────────────────── */
+.tablet {
+  width: 720px;
+  height: 480px;
+  border-radius: 28px;
+  background: #f2f4f8;
+  border: 1px solid rgba(255,255,255,0.06);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.04),
+    0 20px 60px rgba(0,0,0,0.6),
+    0 4px 12px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.9);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── TOP BAR ─────────────────────────────────────── */
+.topbar {
+  padding: 14px 26px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  border-bottom: 1px solid #f3f4f6;
+  flex-shrink: 0;
+}
+.topbar .back {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: #f3f4f6;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; color: #2563eb; cursor: pointer; border: none;
+}
+.topbar .bar-title { font-size: 16px; font-weight: 700; color: #111827; }
+.step-pill {
+  background: #eff6ff; border: 1px solid #bfdbfe;
+  color: #2563eb; font-size: 12px; font-weight: 700;
+  padding: 4px 12px; border-radius: 20px;
+}
+
+/* ─── SCREEN BODY ─────────────────────────────────── */
+.screen-body {
+  flex: 1;
+  padding: 18px 26px;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+/* ─── TYPOGRAPHY ──────────────────────────────────── */
+.screen-title { font-size: 26px; font-weight: 800; color: #111827; letter-spacing: -0.5px; margin-bottom: 3px; line-height: 1.2; }
+.screen-sub   { font-size: 14px; color: #9ca3af; font-weight: 500; margin-bottom: 10px; }
+.field-label  { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #9ca3af; margin: 8px 0 5px; }
+
+/* ─── FIELDS ──────────────────────────────────────── */
+.field {
+  width: 100%; padding: 12px 16px;
+  background: #f9fafb; border: 1.5px solid #e5e7eb;
+  border-radius: 12px; font-size: 18px;
+  font-family: inherit; color: #111827; outline: none;
+}
+.field::placeholder { color: #d1d5db; }
+.field.active { border-color: #2563eb; background: #eff6ff; box-shadow: 0 0 0 3px rgba(37,99,235,0.08); }
+.field-prefix {
+  display: flex; align-items: center;
+  background: #f9fafb; border: 1.5px solid #e5e7eb;
+  border-radius: 12px; overflow: hidden;
+}
+.field-prefix .prefix {
+  padding: 12px 16px; background: #f3f4f6;
+  font-size: 14px; color: #6b7280;
+  border-right: 1.5px solid #e5e7eb; white-space: nowrap;
+}
+.field-prefix input {
+  border: none; outline: none;
+  padding: 12px 16px; font-size: 18px;
+  font-family: inherit; flex: 1; color: #111827; background: transparent;
+}
+
+/* ─── BUTTONS ─────────────────────────────────────── */
+.btn {
+  width: 100%; padding: 13px; border: none;
+  border-radius: 13px; font-size: 14px; font-weight: 700;
+  font-family: inherit; letter-spacing: 0.3px;
+  cursor: pointer; margin-top: 8px;
+}
+.btn-primary { background: #2563eb; color: #fff; box-shadow: 0 4px 16px rgba(37,99,235,0.28); }
+.btn-ghost   { background: #f9fafb; border: 1.5px solid #e5e7eb; color: #6b7280; }
+.btn-success { background: #16a34a; color: #fff; box-shadow: 0 4px 16px rgba(22,163,74,0.25); }
+.btn-danger  { background: #dc2626; color: #fff; box-shadow: 0 4px 16px rgba(220,38,38,0.25); }
+
+/* ─── LANDSCAPE NUMPAD SPLIT ──────────────────────── */
+.ls-numpad { flex-direction: row !important; padding: 0 !important; }
+.ls-left {
+  flex: 1; display: flex; flex-direction: column;
+  padding: 18px 22px; overflow: hidden;
+}
+.ls-right {
+  width: 210px; flex-shrink: 0;
+  border-left: 1px solid #f3f4f6;
+  padding: 14px; display: flex; align-items: center;
+}
+.ls-right .numpad { width: 100%; }
+
+/* ─── NUMPAD ──────────────────────────────────────── */
+.numpad { display: grid; grid-template-columns: repeat(3,1fr); gap: 7px; }
+.numpad-key {
+  background: #f9fafb; border: 1px solid #e5e7eb;
+  border-radius: 12px; padding: 13px 10px;
+  font-size: 22px; font-weight: 600;
+  text-align: center; color: #374151; cursor: pointer;
+}
+.numpad-key.del   { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
+.numpad-key.empty { background: transparent; border: none; }
+
+/* ─── OTP ─────────────────────────────────────────── */
+.otp-row { display: flex; gap: 10px; margin: 10px 0 8px; }
+.otp-box {
+  flex: 1; height: 62px;
+  background: #f9fafb; border: 1.5px solid #e5e7eb;
+  border-radius: 14px; display: flex; align-items: center;
+  justify-content: center; font-size: 28px; font-weight: 800; color: #111827;
+}
+.otp-box.filled { border-color: #2563eb; background: #eff6ff; color: #1d4ed8; }
+.otp-timer  { font-size: 14px; color: #f59e0b; text-align: center; font-weight: 700; }
+.otp-resend { font-size: 12px; color: #9ca3af; text-align: center; margin-top: 5px; }
+.otp-resend a { color: #2563eb; text-decoration: none; font-weight: 600; }
+
+/* ─── USER CARD ───────────────────────────────────── */
+.user-card {
+  background: #f9fafb; border: 1.5px solid #e5e7eb;
+  border-radius: 14px; padding: 14px 18px;
+  margin: 8px 0 4px; display: flex; flex-direction: column; gap: 8px;
+}
+.user-card-row { display: flex; align-items: center; gap: 12px; font-size: 16px; color: #374151; }
+
+/* ─── CART TOPBAR ─────────────────────────────────── */
+.cart-topbar {
+  padding: 12px 22px; display: flex; align-items: center;
+  justify-content: space-between; background: #ffffff;
+  border-bottom: 1px solid #f3f4f6; flex-shrink: 0;
+}
+.cart-topbar .user-name { font-size: 15px; font-weight: 700; color: #111827; display: flex; align-items: center; gap: 7px; }
+.cart-topbar .cart-id   { font-size: 12px; color: #d1d5db; font-weight: 600; }
+.badge {
+  background: #eff6ff; border: 1px solid #bfdbfe;
+  color: #2563eb; font-size: 12px; font-weight: 700;
+  padding: 4px 12px; border-radius: 20px;
+}
+
+/* ─── TOAST ───────────────────────────────────────── */
+.toast {
+  padding: 9px 14px; border-radius: 11px;
+  font-size: 13px; font-weight: 600; margin-bottom: 8px;
+  display: flex; align-items: center; gap: 8px;
+}
+.toast.add    { background: #f0fdf4; border: 1px solid #bbf7d0; color: #16a34a; }
+.toast.remove { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; }
+
+/* ─── EMPTY STATE ─────────────────────────────────── */
+.empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
+.pulse-ring {
+  width: 80px; height: 80px; border-radius: 50%;
+  background: #eff6ff; border: 2px solid #bfdbfe;
+  box-shadow: 0 0 0 10px rgba(37,99,235,0.05);
+  display: flex; align-items: center; justify-content: center; font-size: 32px;
+}
+.empty-title { font-size: 18px; font-weight: 700; color: #111827; }
+.empty-sub   { font-size: 13px; color: #9ca3af; text-align: center; max-width: 300px; line-height: 1.6; }
+.status-chip {
+  background: #f0fdf4; border: 1px solid #bbf7d0; color: #16a34a;
+  font-size: 12px; font-weight: 700; padding: 5px 14px; border-radius: 20px;
+  display: flex; align-items: center; gap: 6px;
+}
+.status-dot { width: 7px; height: 7px; border-radius: 50%; background: #16a34a; }
+
+/* ─── CART ITEMS ──────────────────────────────────── */
+.cart-items { flex: 1; overflow-y: auto; }
+.cart-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 9px 0; border-bottom: 1px solid #f3f4f6;
+}
+.cart-item:last-child { border-bottom: none; }
+.cart-item .item-emoji { font-size: 28px; width: 42px; text-align: center; }
+.cart-item .item-info  { flex: 1; }
+.cart-item .item-name  { font-size: 14px; font-weight: 700; color: #111827; }
+.cart-item .item-brand { font-size: 11px; color: #9ca3af; margin-top: 1px; }
+.cart-item .item-right { text-align: right; }
+.cart-item .item-price { font-size: 15px; font-weight: 700; color: #111827; }
+.qty-pill {
+  display: inline-block; background: #eff6ff;
+  border: 1px solid #bfdbfe; color: #2563eb;
+  font-size: 10px; font-weight: 700;
+  padding: 2px 8px; border-radius: 20px; margin-top: 2px;
+}
+
+/* ─── CART FOOTER ─────────────────────────────────── */
+.cart-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 11px 22px; border-top: 1px solid #f3f4f6;
+  background: #ffffff; flex-shrink: 0;
+}
+.cart-footer .total-label  { font-size: 11px; color: #9ca3af; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+.cart-footer .total-amount { font-size: 22px; font-weight: 900; color: #111827; letter-spacing: -0.5px; }
+.checkout-btn {
+  background: #2563eb; color: #fff;
+  border: none; border-radius: 12px;
+  padding: 12px 18px; font-size: 13px; font-weight: 700;
+  font-family: inherit; cursor: pointer;
+  box-shadow: 0 4px 16px rgba(37,99,235,0.28); white-space: nowrap;
+}
+.checkout-btn.disabled { opacity: 0.3; box-shadow: none; cursor: default; }
+
+/* ─── ORDER REVIEW ────────────────────────────────── */
+.order-line {
+  display: flex; justify-content: space-between;
+  font-size: 14px; color: #6b7280;
+  padding: 9px 0; border-bottom: 1px solid #f3f4f6;
+}
+.order-line .name { color: #374151; font-weight: 600; }
+.order-line.total {
+  font-size: 18px; font-weight: 900; color: #111827;
+  border-bottom: none; border-top: 1.5px solid #e5e7eb;
+  margin-top: 4px; padding-top: 10px;
+}
+.order-line.total .price { color: #2563eb; }
+hr.divider { border: none; border-top: 1px solid #f3f4f6; margin: 6px 0; }
+
+/* ─── AMOUNT CHIP ─────────────────────────────────── */
+.amount-chip {
+  background: #eff6ff; border: 1px solid #bfdbfe;
+  border-radius: 14px; padding: 10px 18px;
+  text-align: center; margin-bottom: 12px;
+}
+.amount-chip .label { font-size: 11px; color: #93c5fd; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+.amount-chip .value { font-size: 26px; font-weight: 900; color: #1d4ed8; letter-spacing: -0.5px; }
+
+/* ─── PAYMENT OPTION ──────────────────────────────── */
+.pay-option {
+  display: flex; align-items: center; gap: 14px;
+  padding: 12px 16px; background: #f9fafb;
+  border: 1.5px solid #e5e7eb; border-radius: 14px;
+  margin-bottom: 7px; cursor: pointer;
+}
+.pay-option.active { background: #eff6ff; border-color: #93c5fd; box-shadow: 0 0 0 3px rgba(37,99,235,0.07); }
+.pay-option .pay-icon  { font-size: 26px; }
+.pay-option .pay-title { font-size: 14px; font-weight: 700; color: #111827; }
+.pay-option .pay-sub   { font-size: 11px; color: #9ca3af; margin-top: 1px; }
+.pay-option .pay-arrow { margin-left: auto; color: #d1d5db; font-size: 18px; }
+
+/* ─── TAP CARD ────────────────────────────────────── */
+.tap-center {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 12px;
+}
+.reader-ring {
+  width: 100px; height: 100px; border-radius: 26px;
+  background: #eff6ff; border: 2px dashed #93c5fd;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 40px; box-shadow: 0 0 0 10px rgba(37,99,235,0.05);
+}
+.tap-title { font-size: 17px; font-weight: 700; color: #111827; text-align: center; }
+.tap-sub   { font-size: 12px; color: #9ca3af; text-align: center; max-width: 340px; line-height: 1.6; }
+.waiting-chip {
+  background: #fffbeb; border: 1px solid #fde68a; color: #d97706;
+  font-size: 12px; font-weight: 700; padding: 5px 14px;
+  border-radius: 20px; display: flex; align-items: center; gap: 6px;
+}
+.blink { width: 7px; height: 7px; border-radius: 50%; background: #f59e0b; }
+
+/* ─── PROCESSING ──────────────────────────────────── */
+.processing-center {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 14px;
+  padding: 20px; background: #ffffff;
+}
+.spinner-ring {
+  width: 54px; height: 54px;
+  border: 4px solid #e5e7eb; border-top-color: #2563eb; border-radius: 50%;
+}
+.proc-title { font-size: 20px; font-weight: 800; color: #111827; }
+.card-chip  {
+  width: 100%; background: #f9fafb; border: 1.5px solid #e5e7eb;
+  border-radius: 14px; padding: 14px; text-align: center;
+}
+.card-chip .chip-label { font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; }
+.card-chip .card-num   { font-size: 18px; font-weight: 800; color: #1d4ed8; letter-spacing: 3px; margin: 4px 0; }
+.card-chip .card-meta  { font-size: 12px; color: #9ca3af; }
+.proc-hint { font-size: 12px; color: #d1d5db; text-align: center; }
+
+/* ─── SUCCESS ─────────────────────────────────────── */
+.success-center {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 8px;
+  padding: 18px 28px;
+  background: linear-gradient(160deg, #f0fdf4 0%, #ffffff 60%);
+}
+.success-icon   { font-size: 52px; }
+.success-title  { font-size: 20px; font-weight: 800; color: #16a34a; }
+.success-amount { font-size: 36px; font-weight: 900; color: #111827; letter-spacing: -1px; }
+.success-card   { font-size: 13px; color: #9ca3af; }
+.notif-box {
+  width: 100%; background: #f9fafb; border: 1px solid #e5e7eb;
+  border-radius: 13px; padding: 10px 16px;
+  display: flex; flex-direction: column; gap: 7px;
+}
+.notif-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #6b7280; }
+.thanks { font-size: 16px; font-weight: 700; color: #111827; }
+.redirect-bar { font-size: 11px; color: #d1d5db; }
+.redirect-bar strong { color: #2563eb; }
+
+/* ─── FAILED ──────────────────────────────────────── */
+.failed-center {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 10px;
+  padding: 18px 28px;
+  background: linear-gradient(160deg, #fef2f2 0%, #ffffff 60%);
+}
+.failed-icon  { font-size: 52px; }
+.failed-title { font-size: 20px; font-weight: 800; color: #dc2626; }
+.failed-sub   { font-size: 13px; color: #9ca3af; text-align: center; max-width: 420px; line-height: 1.6; }
+
+/* ─── SPLASH ──────────────────────────────────────── */
+.splash {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 14px;
+  padding: 32px 60px;
+  background: linear-gradient(160deg, #eff6ff 0%, #ffffff 55%);
+}
+.splash-logo {
+  width: 80px; height: 80px; border-radius: 24px;
+  background: #2563eb; display: flex; align-items: center; justify-content: center;
+  font-size: 38px; box-shadow: 0 12px 32px rgba(37,99,235,0.3);
+}
+.splash-title { font-size: 34px; font-weight: 900; color: #111827; letter-spacing: -0.5px; }
+.splash-sub   { font-size: 14px; color: #9ca3af; text-align: center; line-height: 1.7; }
+.splash-btn {
+  width: 100%; padding: 16px; background: #2563eb;
+  color: #fff; border: none; border-radius: 14px;
+  font-size: 17px; font-weight: 800; font-family: inherit;
+  letter-spacing: 0.5px; cursor: pointer;
+  box-shadow: 0 8px 24px rgba(37,99,235,0.3); margin-top: 6px;
+}
+.splash-footer { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #d1d5db; margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<div class="viewer-title">Smart<span>Cart</span> &nbsp;·&nbsp; Prototype</div>
+
+<div class="nav-row">
+  <button class="nav-btn" id="prevBtn">&#8249;</button>
+
+  <div class="screens">
+
+    <!-- ── S1: WELCOME ────────────────────────── -->
+    <div class="screen active" data-name="Screen 1 · Welcome">
+      <div class="tablet">
+        <div class="splash">
+          <div class="splash-logo">🛒</div>
+          <div class="splash-title">SmartCart</div>
+          <div class="splash-sub">Scan &amp; Go shopping.<br>No queues. No hassle.</div>
+          <button class="splash-btn">TAP TO START</button>
+          <div class="splash-footer">
+            <span style="width:7px;height:7px;border-radius:50%;background:#16a34a;display:inline-block;flex-shrink:0;"></span>
+            Cart CART-04 &nbsp;·&nbsp; Ready
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── S2: MOBILE ENTRY ───────────────────── -->
+    <div class="screen" data-name="Screen 2 · Mobile Number">
+      <div class="tablet">
+        <div class="topbar">
+          <button class="back">&#8249;</button>
+          <span class="bar-title">Verify Identity</span>
+          <span class="step-pill">1 / 3</span>
+        </div>
+        <div class="screen-body ls-numpad">
+          <div class="ls-left">
+            <div class="screen-title">Enter your<br>mobile number</div>
+            <div class="screen-sub">We'll send a one-time code</div>
+            <div class="field-label">Mobile Number</div>
+            <div class="field-prefix">
+              <span class="prefix">🇧🇪 +32</span>
+              <input type="text" placeholder="04XX XXX XXX">
+            </div>
+            <button class="btn btn-primary" style="margin-top:12px;">SEND CODE →</button>
+          </div>
+          <div class="ls-right">
+            <div class="numpad">
+              <div class="numpad-key">1</div><div class="numpad-key">2</div><div class="numpad-key">3</div>
+              <div class="numpad-key">4</div><div class="numpad-key">5</div><div class="numpad-key">6</div>
+              <div class="numpad-key">7</div><div class="numpad-key">8</div><div class="numpad-key">9</div>
+              <div class="numpad-key empty"></div><div class="numpad-key">0</div><div class="numpad-key del">⌫</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── S3: OTP ─────────────────────────────── -->
+    <div class="screen" data-name="Screen 3 · OTP Verification">
+      <div class="tablet">
+        <div class="topbar">
+          <button class="back">&#8249;</button>
+          <span class="bar-title">Verify Code</span>
+          <span class="step-pill">2 / 3</span>
+        </div>
+        <div class="screen-body ls-numpad">
+          <div class="ls-left">
+            <div class="screen-title">Check your<br>messages</div>
+            <div class="screen-sub">Code sent to +32 04XX XXX X3</div>
+            <div class="otp-row" style="margin:10px 0 6px;">
+              <div class="otp-box filled">3</div>
+              <div class="otp-box filled">7</div>
+              <div class="otp-box">_</div>
+              <div class="otp-box"></div>
+            </div>
+            <div class="otp-timer">⏱ Expires in 02:47</div>
+            <div class="otp-resend">Didn't receive it? <a href="#">Resend code</a></div>
+          </div>
+          <div class="ls-right">
+            <div class="numpad">
+              <div class="numpad-key">1</div><div class="numpad-key">2</div><div class="numpad-key">3</div>
+              <div class="numpad-key">4</div><div class="numpad-key">5</div><div class="numpad-key">6</div>
+              <div class="numpad-key">7</div><div class="numpad-key">8</div><div class="numpad-key">9</div>
+              <div class="numpad-key empty"></div><div class="numpad-key">0</div><div class="numpad-key del">⌫</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── S4a: RETURNING USER ────────────────── -->
+    <div class="screen" data-name="Screen 4a · Returning User">
+      <div class="tablet">
+        <div class="topbar">
+          <button class="back">&#8249;</button>
+          <span class="bar-title">Confirm Identity</span>
+          <span class="step-pill">3 / 3</span>
+        </div>
+        <div class="screen-body">
+          <div class="screen-title">Welcome back! 👋</div>
+          <div class="screen-sub">Is this you?</div>
+          <div class="user-card">
+            <div class="user-card-row">👤 &nbsp;<strong style="color:#111827;">John Doe</strong></div>
+            <div class="user-card-row">✉️ &nbsp;john.doe@email.com</div>
+          </div>
+          <button class="btn btn-success">YES, THAT'S ME</button>
+          <button class="btn btn-ghost">NOT ME — USE DIFFERENT</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── S4b: NEW USER ──────────────────────── -->
+    <div class="screen" data-name="Screen 4b · New User Setup">
+      <div class="tablet">
+        <div class="topbar">
+          <button class="back">&#8249;</button>
+          <span class="bar-title">Create Account</span>
+          <span class="step-pill">3 / 3</span>
+        </div>
+        <div class="screen-body">
+          <div class="screen-title">Let's set<br>you up</div>
+          <div class="screen-sub">Quick one-time setup</div>
+          <div class="field-label">Full Name</div>
+          <input class="field active" type="text" value="John Doe">
+          <div class="field-label">Email Address</div>
+          <input class="field" type="text" placeholder="john@email.com">
+          <button class="btn btn-primary" style="margin-top:14px;">START SHOPPING →</button>
+          <div style="margin-top:auto;padding:11px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:11px;text-align:center;font-size:11px;color:#d1d5db;letter-spacing:1px;">
+            ⌨️ ON-SCREEN KEYBOARD
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── S5: SCANNING (EMPTY) ───────────────── -->
+    <div class="screen" data-name="Screen 5 · Ready to Scan">
+      <div class="tablet">
+        <div class="cart-topbar">
+          <span class="user-name">👤 John</span>
+          <span class="cart-id">CART-04</span>
+          <span class="badge">0 items</span>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;background:#ffffff;">
+          <div class="empty-state" style="padding:20px;">
+            <div class="pulse-ring">📡</div>
+            <div class="empty-title">Ready to scan</div>
+            <div class="empty-sub">Tap an RFID tag to the reader on the side of the cart</div>
+            <div class="status-chip"><span class="status-dot"></span> Listening for tags...</div>
+          </div>
+        </div>
+        <div class="cart-footer">
+          <div>
+            <div class="total-label">Total</div>
+            <div class="total-amount">€ 0.00</div>
+          </div>
+          <button class="checkout-btn disabled">CHECKOUT →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── S6: ITEMS ADDED ────────────────────── -->
+    <div class="screen" data-name="Screen 6 · Items Added">
+      <div class="tablet">
+        <div class="cart-topbar">
+          <span class="user-name">👤 John</span>
+          <span class="cart-id">CART-04</span>
+          <span class="badge">3 items</span>
+        </div>
+        <div class="screen-body" style="padding:12px 18px 0;background:#ffffff;">
+          <div class="toast add">✅ Heineken 6-pack added</div>
+          <div class="cart-items">
+            <div class="cart-item">
+              <span class="item-emoji">🍺</span>
+              <div class="item-info"><div class="item-name">Heineken 6-pack</div><div class="item-brand">Brewery Fresh</div></div>
+              <div class="item-right"><div class="item-price">€ 6.49</div><div class="qty-pill">x1</div></div>
+            </div>
+            <div class="cart-item">
+              <span class="item-emoji">🥛</span>
+              <div class="item-info"><div class="item-name">Whole Milk 1L</div><div class="item-brand">Farm Fresh</div></div>
+              <div class="item-right"><div class="item-price">€ 3.78</div><div class="qty-pill">x2</div></div>
+            </div>
+            <div class="cart-item">
+              <span class="item-emoji">🍞</span>
+              <div class="item-info"><div class="item-name">Sourdough Bread</div><div class="item-brand">Artisan Bakery</div></div>
+              <div class="item-right"><div class="item-price">€ 3.20</div><div class="qty-pill">x1</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="cart-footer">
+          <div><div class="total-label">Total</div><div class="total-amount">€ 13.47</div></div>
+          <button class="checkout-btn">CHECKOUT →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── S7: ITEM REMOVED ───────────────────── -->
+    <div class="screen" data-name="Screen 7 · Item Removed (re-tap)">
+      <div class="tablet">
+        <div class="cart-topbar">
+          <span class="user-name">👤 John</span>
+          <span class="cart-id">CART-04</span>
+          <span class="badge">2 items</span>
+        </div>
+        <div class="screen-body" style="padding:12px 18px 0;background:#ffffff;">
+          <div class="toast remove">🗑️ Heineken 6-pack removed</div>
+          <div class="cart-items">
+            <div class="cart-item">
+              <span class="item-emoji">🥛</span>
+              <div class="item-info"><div class="item-name">Whole Milk 1L</div><div class="item-brand">Farm Fresh</div></div>
+              <div class="item-right"><div class="item-price">€ 3.78</div><div class="qty-pill">x2</div></div>
+            </div>
+            <div class="cart-item">
+              <span class="item-emoji">🍞</span>
+              <div class="item-info"><div class="item-name">Sourdough Bread</div><div class="item-brand">Artisan Bakery</div></div>
+              <div class="item-right"><div class="item-price">€ 3.20</div><div class="qty-pill">x1</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="cart-footer">
+          <div><div class="total-label">Total</div><div class="total-amount">€ 6.98</div></div>
+          <button class="checkout-btn">CHECKOUT →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── S8: ORDER REVIEW ───────────────────── -->
+    <div class="screen" data-name="Screen 8 · Order Review">
+      <div class="tablet">
+        <div class="topbar">
+          <button class="back">&#8249;</button>
+          <span class="bar-title">Review Order</span>
+          <span class="bar-right"></span>
+        </div>
+        <div class="screen-body">
+          <div class="order-line"><span class="name">🥛 Whole Milk 1L &nbsp;<span class="qty-pill" style="font-size:10px;">x2</span></span><span>€ 3.78</span></div>
+          <div class="order-line"><span class="name">🍞 Sourdough Bread &nbsp;<span class="qty-pill" style="font-size:10px;">x1</span></span><span>€ 3.20</span></div>
+          <hr class="divider" style="margin-top:4px;">
+          <div class="order-line"><span>Subtotal</span><span>€ 6.98</span></div>
+          <div class="order-line"><span>VAT (21%)</span><span>€ 1.47</span></div>
+          <div class="order-line total"><span>TOTAL</span><span class="price">€ 8.45</span></div>
+          <button class="btn btn-primary" style="margin-top:16px;">CONFIRM &amp; PAY →</button>
+          <button class="btn btn-ghost">← KEEP SHOPPING</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── S9: PAYMENT METHOD ─────────────────── -->
+    <div class="screen" data-name="Screen 9 · Payment Method">
+      <div class="tablet">
+        <div class="topbar">
+          <button class="back">&#8249;</button>
+          <span class="bar-title">Payment Method</span>
+          <span class="bar-right"></span>
+        </div>
+        <div class="screen-body">
+          <div class="amount-chip">
+            <div class="label">Amount Due</div>
+            <div class="value">€ 8.45</div>
+          </div>
+          <div class="pay-option active">
+            <span class="pay-icon">💳</span>
+            <div><div class="pay-title">Contactless Card</div><div class="pay-sub">Tap your card to the reader</div></div>
+            <span class="pay-arrow">›</span>
+          </div>
+          <div class="pay-option">
+            <span class="pay-icon">🅿️</span>
+            <div><div class="pay-title">PayPal</div><div class="pay-sub">Scan QR with your app</div></div>
+            <span class="pay-arrow">›</span>
+          </div>
+          <div class="pay-option">
+            <span class="pay-icon">📱</span>
+            <div><div class="pay-title">Mobile Pay</div><div class="pay-sub">Apple Pay / Google Pay</div></div>
+            <span class="pay-arrow">›</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── S10: TAP CARD ──────────────────────── -->
+    <div class="screen" data-name="Screen 10 · Tap Card">
+      <div class="tablet">
+        <div class="topbar">
+          <button class="back">&#8249;</button>
+          <span class="bar-title">Contactless Payment</span>
+          <span class="bar-right"></span>
+        </div>
+        <div class="screen-body">
+          <div class="amount-chip">
+            <div class="label">Amount Due</div>
+            <div class="value">€ 8.45</div>
+          </div>
+          <div class="tap-center">
+            <div class="reader-ring">((•))</div>
+            <div class="tap-title">Tap your card to the reader</div>
+            <div class="tap-sub">Use the contactless sensor on the right side of the cart</div>
+            <div class="waiting-chip"><span class="blink"></span> Waiting for card...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── S11: PROCESSING ────────────────────── -->
+    <div class="screen" data-name="Screen 11 · Processing Payment">
+      <div class="tablet">
+        <div class="processing-center">
+          <div class="spinner-ring"></div>
+          <div class="proc-title">Processing...</div>
+          <div class="card-chip">
+            <div class="chip-label">Card Detected</div>
+            <div class="card-num">**** **** **** 4821</div>
+            <div class="card-meta">J. Doe &nbsp;|&nbsp; Exp 09/27</div>
+          </div>
+          <div class="proc-hint">Please wait — do not remove your card</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── S12: SUCCESS ───────────────────────── -->
+    <div class="screen" data-name="Screen 12 · Payment Successful">
+      <div class="tablet">
+        <div class="success-center">
+          <div class="success-icon">✅</div>
+          <div class="success-title">Payment Successful!</div>
+          <div class="success-amount">€ 8.45</div>
+          <div class="success-card">charged to **** 4821</div>
+          <div class="notif-box">
+            <div class="notif-row">📧 Receipt → john@email.com</div>
+            <div class="notif-row">💬 SMS → +32 04XX XX3</div>
+          </div>
+          <div class="thanks">Thank you, John! 🛍️</div>
+          <button class="btn btn-primary" style="margin-top:4px;padding:11px;">START AGAIN</button>
+          <div class="redirect-bar">Returning to start in <strong>08s</strong>...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── S13: FAILED ────────────────────────── -->
+    <div class="screen" data-name="Screen 13 · Payment Failed">
+      <div class="tablet">
+        <div class="failed-center">
+          <div class="failed-icon">❌</div>
+          <div class="failed-title">Payment Failed</div>
+          <div class="failed-sub">Your card could not be charged. Please try again or choose a different payment method.</div>
+          <button class="btn btn-danger" style="margin-top:8px;">TRY AGAIN</button>
+          <button class="btn btn-ghost">CHOOSE DIFFERENT METHOD</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /screens -->
+
+  <button class="nav-btn" id="nextBtn">&#8250;</button>
+</div><!-- /nav-row -->
+
+<div class="viewer-footer">
+  <div class="screen-label" id="screenLabel"></div>
+  <div class="dots" id="dots"></div>
+  <div class="key-hint">← → arrow keys &nbsp;·&nbsp; click dots to jump</div>
+</div>
+
+<script>
+  const screens  = Array.from(document.querySelectorAll('.screen'));
+  const dotsEl   = document.getElementById('dots');
+  const labelEl  = document.getElementById('screenLabel');
+  const prevBtn  = document.getElementById('prevBtn');
+  const nextBtn  = document.getElementById('nextBtn');
+  let current = 0;
+
+  screens.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot';
+    d.addEventListener('click', () => goTo(i));
+    dotsEl.appendChild(d);
+  });
+
+  function goTo(n) {
+    screens[current].classList.remove('active');
+    dotsEl.children[current].classList.remove('active');
+    current = Math.max(0, Math.min(n, screens.length - 1));
+    screens[current].classList.add('active');
+    dotsEl.children[current].classList.add('active');
+    labelEl.textContent = screens[current].dataset.name;
+    prevBtn.disabled = current === 0;
+    nextBtn.disabled = current === screens.length - 1;
+  }
+
+  prevBtn.addEventListener('click', () => goTo(current - 1));
+  nextBtn.addEventListener('click', () => goTo(current + 1));
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowLeft')  goTo(current - 1);
+    if (e.key === 'ArrowRight') goTo(current + 1);
+  });
+
+  goTo(0);
+</script>
+
+</body>
+</html>

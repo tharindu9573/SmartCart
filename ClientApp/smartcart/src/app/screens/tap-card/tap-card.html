@@ -1,0 +1,43 @@
+<div class="tablet">
+  <div class="topbar">
+    <button class="back" [disabled]="resolving" (click)="back()">&#8249;</button>
+    <span class="bar-title">Contactless Payment</span>
+    <span></span>
+  </div>
+
+  <div class="screen-body">
+    <div class="amount-chip">
+      <div class="label">Amount Due</div>
+      <div class="value">$ {{ total.toFixed(2) }}</div>
+    </div>
+
+    <!-- Waiting for card -->
+    @if (!resolving) {
+      <div class="tap-center">
+        <div class="reader-ring">((&#8226;))</div>
+        <div class="tap-title">Tap your card to the reader</div>
+        <div class="tap-sub">Use the contactless sensor on the right side of the cart</div>
+        <div class="waiting-chip">
+          <span class="blink-dot"></span>
+          Waiting for card...
+        </div>
+        @if (error) {
+          <div class="error-banner" style="margin-top: 8px; text-align: center;">{{ error }}</div>
+        }
+      </div>
+    }
+
+    <!-- Card detected — resolving token -->
+    @if (resolving) {
+      <div class="tap-center">
+        <div class="spinner-ring"></div>
+        <div class="tap-title">Card detected</div>
+        <div class="tap-sub">Verifying your card, please hold...</div>
+        <div class="waiting-chip" style="background:#f0fdf4;border-color:#bbf7d0;color:#16a34a;">
+          <span class="status-dot"></span>
+          Authenticating...
+        </div>
+      </div>
+    }
+  </div>
+</div>

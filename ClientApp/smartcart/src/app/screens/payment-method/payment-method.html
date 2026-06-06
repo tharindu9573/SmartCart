@@ -1,0 +1,29 @@
+<div class="tablet">
+  <div class="topbar">
+    <button class="back" (click)="back()">&#8249;</button>
+    <span class="bar-title">Payment Method</span>
+    <span></span>
+  </div>
+
+  <div class="screen-body">
+    <div class="amount-chip">
+      <div class="label">Amount Due</div>
+      <div class="value">$ {{ total.toFixed(2) }}</div>
+    </div>
+
+    @for (opt of options; track opt.id) {
+      <div class="pay-option" [class.active]="selected === opt.id" (click)="select(opt.id)">
+        <span class="pay-icon" [innerHTML]="opt.icon"></span>
+        <div>
+          <div class="pay-title">{{ opt.title }}</div>
+          <div class="pay-sub">{{ opt.sub }}</div>
+        </div>
+        <span class="pay-arrow">&#8250;</span>
+      </div>
+    }
+
+    <button class="btn btn-primary" style="margin-top: 12px;" (click)="proceed()">
+      PROCEED &#8594;
+    </button>
+  </div>
+</div>

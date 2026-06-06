@@ -1,0 +1,49 @@
+<div class="tablet">
+  <div class="topbar">
+    <button class="back" (click)="back()">&#8249;</button>
+    <span class="bar-title">Verify Identity</span>
+    <span class="step-pill">1 / 3</span>
+  </div>
+
+  <div class="screen-body ls-numpad">
+    <div class="ls-left">
+      <div class="screen-title">Enter your<br>mobile number</div>
+      <div class="screen-sub">We'll send a one-time code</div>
+      <div class="field-label">Mobile Number</div>
+      <div class="field-prefix">
+        <span class="prefix">&#127473;&#127472; +94</span>
+        <input
+          [type]="isMobile ? 'tel' : 'text'"
+          [attr.inputmode]="isMobile ? 'numeric' : null"
+          [value]="formattedNumber"
+          placeholder="07X XXX XXXX"
+          [readOnly]="!isMobile"
+          (input)="isMobile && onNativeInput($event)">
+      </div>
+      @if (error) {
+        <div class="error-banner">{{ error }}</div>
+      }
+      <button class="btn btn-primary" style="margin-top:12px;"
+        [disabled]="loading || digits.length < 9"
+        (click)="send()">
+        {{ loading ? 'Sending...' : 'SEND CODE →' }}
+      </button>
+    </div>
+
+    @if (!isMobile) {
+      <div class="ls-right">
+        <div class="numpad">
+          @for (k of ['1','2','3','4','5','6','7','8','9','','0','del']; track k) {
+            @if (k === '') {
+              <div class="numpad-key empty"></div>
+            } @else if (k === 'del') {
+              <div class="numpad-key del" (click)="press('del')">&#9003;</div>
+            } @else {
+              <div class="numpad-key" (click)="press(k)">{{ k }}</div>
+            }
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>

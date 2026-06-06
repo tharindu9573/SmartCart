@@ -1,0 +1,12 @@
+services:
+  smartcart:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: smartcart:latest
+    container_name: smartcart
+    ports:
+      - "8090:80"
+    env_file:
+      - .env
+    restart: unless-stopped

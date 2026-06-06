@@ -1,0 +1,69 @@
+<div class="tablet">
+  <div class="topbar">
+    <button class="back" (click)="back()">&#8249;</button>
+    <span class="bar-title">Verify Code</span>
+    <span class="step-pill">2 / 3</span>
+  </div>
+
+  <div class="screen-body ls-numpad">
+    <div class="ls-left">
+      <div class="screen-title">Check your<br>messages</div>
+      <div class="screen-sub">Code sent to {{ maskedMobile }}</div>
+
+      <div class="otp-row" style="gap: 7px; position: relative;" (click)="isMobile && focusOtpInput()">
+        @for (b of boxes; track $index) {
+          <div class="otp-box"
+               [class.filled]="b !== ''"
+               [class.otp-cursor]="isMobile && b === '' && $index === digits.length">{{ b || '' }}</div>
+        }
+        @if (isMobile) {
+          <input
+            #otpInput
+            type="tel"
+            inputmode="numeric"
+            maxlength="6"
+            autocomplete="one-time-code"
+            (input)="onNativeOtpInput($event)"
+            style="position:absolute;opacity:0;width:100%;height:100%;top:0;left:0;border:none;outline:none;cursor:pointer;">
+        }
+      </div>
+
+      @if (secondsLeft() > 0) {
+        <div class="otp-timer">&#9203; Expires in {{ timerLabel }}</div>
+      } @else {
+        <div class="otp-timer" style="color:#dc2626;">Code expired</div>
+      }
+      <div class="otp-resend">
+        Didn't receive it?
+        @if (secondsLeft() <= 0) {
+          <a (click)="resend()">Resend code</a>
+        } @else {
+          <span style="color:#d1d5db;">Resend available after timer</span>
+        }
+      </div>
+
+      @if (error) {
+        <div class="error-banner">{{ error }}</div>
+      }
+      @if (loading) {
+        <div style="text-align:center;margin-top:12px;color:#9ca3af;font-size:13px;">Verifying...</div>
+      }
+    </div>
+
+    @if (!isMobile) {
+      <div class="ls-right">
+        <div class="numpad">
+          @for (k of ['1','2','3','4','5','6','7','8','9','','0','del']; track k) {
+            @if (k === '') {
+              <div class="numpad-key empty"></div>
+            } @else if (k === 'del') {
+              <div class="numpad-key del" (click)="press('del')">&#9003;</div>
+            } @else {
+              <div class="numpad-key" (click)="press(k)">{{ k }}</div>
+            }
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>

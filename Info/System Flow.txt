@@ -1,0 +1,30 @@
+1). User initiates the cart by clicking the 'Start' button on the FE (Angular).
+2). The system asks the user to enter their mobile number.
+	- OTP verification via Azure Communication Service.
+3). Fetch user data by mobile number. If the user exists, they are asked to confirm their name and email; otherwise, they are asked to enter them.
+4). Create a new CartSession record in the DB (CartSession table).
+	- SessionId (Primary Key — used to identify the user's current cart session. Multiple sessions can exist for the same cart. In that case, a new record should be added to the CartSession table with the same CartId but a different SessionId. IsActive is updated when switching between carts. When a scan event arrives at the backend, it picks the active session for the corresponding CartId), IsActive, CartId (from Cart table), UserId, Status (e.g. Started, Scanning, Checkout, PaymentProcessing, Completed), Timestamps.
+5). The user is asked (via FE) to scan items.
+6). When scanning, the user has to tap the RFID tag to the scanner.
+7). The Arduino sends UID, CartId, and Timestamp (the FE application and physical cart are intertwined, so they share the same CartId) to Azure IoT Hub (used for authentication, device registration, and high throughput).
+8). IoT Hub sends data to Event Hub (for decoupling, scalability, and to enable multiple clients for logs and analytics via consumer groups).
+9). Azure App Service (Docker) consumes the event via EventHubConsumerClient.
+10). Extract the CartId, ProductId (UID), and Timestamp, and retrieve data such as ProductDetails (Id, Name, Price, Image from the product table) and cart details from the Cart and CartSession tables.
+	 - We should use Redis cache for quick UID lookups instead of hitting the SQL DB every time.
+11). Send data to FE via WebSocket protocol. Append the item to the list and update the total.
+12). When a similar product is scanned, we should increase the quantity (get the product from the DB, send it to FE, and FE increases the quantity only).
+13). When the same UID is scanned again, we need to remove the product from the cart (we assume the product has been removed from the physical cart).
+	 - Each RFID tag uniquely represents one physical unit, so we can implement toggle-style cart logic with a single event.
+	 - We add a CartEvent table to log every scan: (EventId, UID, CartId, SessionId, Action (Add/Remove), Timestamp).
+	 - We should use Redis cache for quick UID lookups instead of hitting the SQL DB every time.
+14). When the confirm button is clicked via FE, we insert the data (list) into the CartSessionItem table (with CartId and SessionId). The status is also updated to Checkout, and the user is navigated to the payment page.
+15). When 'Pay' is clicked, the user is asked to select a preferred payment method (Credit/Debit, PayPal, etc.).
+16). When the user selects a contactless payment type, they are asked to scan their payment card at the contactless sensor. (Since we use Wokwi, we add another RFID sensor for this. We treat the UID as a payment token. When the token is sent to the backend via the payment topic, it maps the token details with sample payment card details stored in the backend. We can use Azure Key Vault for this.)
+	 Maps PaymentUID to MockCard details:
+		- UID → MaskedCardNumber, HolderName, Expiry, Balance.
+		- Deducts cart total, inserts into Transaction table.
+		- Status → PaymentProcessing.
+17). Payment is processed (show processing via FE). When successful (shown to the user via FE), update the payment tables, update the status of the Cart table to Completed, update the inventory, generate an invoice, and send it to the user's email. Send a greeting message to the user's mobile (via Azure Communication Service).
+18). Show a greeting message to the user via FE. Allow the user to 'Start Again' (a new session). Automatically redirect to the start page after a few seconds.
+19). When payment fails, ask the user to retry.
+20). Upon a successful transaction, the backend marks the session inactive.

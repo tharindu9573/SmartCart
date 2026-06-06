@@ -1,0 +1,31 @@
+<div class="tablet">
+  <div class="topbar">
+    <button class="back" (click)="back()">&#8249;</button>
+    <span class="bar-title">Review Order</span>
+    <span></span>
+  </div>
+
+  <div class="screen-body" style="overflow-y: auto;">
+    @for (item of items; track item.productId) {
+    <div class="order-line">
+      <span class="name" style="display:flex;align-items:center;gap:8px;">
+        <span>&#128230;</span>
+        {{ item.name }} &nbsp;
+        <span class="qty-pill" style="font-size:10px;">x{{ item.quantity }}</span>
+      </span>
+      <span>$ {{ (item.price * item.quantity).toFixed(2) }}</span>
+    </div>
+    }
+
+    <hr class="divider" style="margin-top:4px;">
+    <div class="order-line"><span>Subtotal</span><span>$ {{ subtotal.toFixed(2) }}</span></div>
+    <div class="order-line"><span>VAT ({{ (vatRate * 100).toFixed(0) }}%)</span><span>$ {{ vat.toFixed(2)
+        }}</span></div>
+    <div class="order-line total"><span>TOTAL</span><span class="price">$ {{ total.toFixed(2) }}</span></div>
+
+    <button class="btn btn-primary" style="margin-top:16px;" [disabled]="loading" (click)="confirmAndPay()">
+      {{ loading ? 'Confirming...' : 'CONFIRM & PAY →' }}
+    </button>
+    <button class="btn btn-ghost" (click)="back()">&#8592; KEEP SHOPPING</button>
+  </div>
+</div>

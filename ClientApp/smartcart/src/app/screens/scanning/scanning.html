@@ -1,0 +1,61 @@
+<div class="tablet">
+  <!-- Cart top bar -->
+  <div class="cart-topbar">
+    <span class="user-name">&#128100; {{ (user?.name ?? 'Guest').split(' ')[0] }}</span>
+    <span class="cart-id">{{ cartLabel }}</span>
+    <span class="badge">{{ totalItems }} {{ totalItems === 1 ? 'item' : 'items' }}</span>
+  </div>
+
+  <!-- Content -->
+  <div class="content-area">
+    <!-- Toast -->
+    @if (toast) {
+    <div class="toast-wrap">
+      <div class="toast" [class.add]="toast.type === 'add'" [class.remove]="toast.type === 'remove'">
+        {{ toast.type === 'add' ? '&#9989;' : '&#128465;&#65039;' }} {{ toast.name }} {{ toast.type === 'add' ? 'added'
+        : 'removed' }}
+      </div>
+    </div>
+    }
+
+    <!-- Empty state -->
+    @if (items.length === 0) {
+    <div class="empty-state" style="padding: 20px;">
+      <div class="pulse-ring">&#128225;</div>
+      <div class="empty-title">Ready to scan</div>
+      <div class="empty-sub">Tap an RFID tag to the reader on the side of the cart</div>
+      <div class="status-chip"><span class="status-dot"></span> Listening for tags...</div>
+    </div>
+    }
+
+    <!-- Item list -->
+    @if (items.length > 0) {
+    <div class="cart-items" style="padding: 0 18px;">
+      @for (item of items; track item.productId) {
+      <div class="cart-item">
+        <span class="item-emoji">&#128230;</span>
+        <div class="item-info">
+          <div class="item-name">{{ item.name }}</div>
+          <div class="item-brand">{{ item.categoryName }}</div>
+        </div>
+        <div class="item-right">
+          <div class="item-price">$ {{ (item.price * item.quantity).toFixed(2) }}</div>
+          <div class="qty-pill">x{{ item.quantity }}</div>
+        </div>
+      </div>
+      }
+    </div>
+    }
+  </div>
+
+  <!-- Footer -->
+  <div class="cart-footer">
+    <div>
+      <div class="total-label">Total</div>
+      <div class="total-amount">$ {{ subtotal.toFixed(2) }}</div>
+    </div>
+    <button class="checkout-btn" [disabled]="items.length === 0" (click)="checkout()">
+      CHECKOUT &#8594;
+    </button>
+  </div>
+</div>

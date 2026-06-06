@@ -1,0 +1,30 @@
+<div class="tablet">
+  <div class="topbar">
+    <button class="back" (click)="back()">&#8249;</button>
+    <span class="bar-title">Create Account</span>
+    <span class="step-pill">3 / 3</span>
+  </div>
+
+  <div class="screen-body">
+    <div class="screen-title">Let's set<br>you up</div>
+    <div class="screen-sub">Quick one-time setup</div>
+
+    <div class="field-label">Full Name</div>
+    <input class="field" [class.active]="name !== ''" type="text" [(ngModel)]="name" placeholder="John Doe">
+
+    <div class="field-label">Email Address</div>
+    <input class="field" [class.active]="email !== ''" type="email" [(ngModel)]="email" placeholder="john@email.com">
+
+    @if (error) {
+      <div class="error-banner">{{ error }}</div>
+    }
+
+    <button class="btn btn-primary" style="margin-top:14px;" [disabled]="loading" (click)="submit()">
+      {{ loading ? 'Setting up...' : 'START SHOPPING →' }}
+    </button>
+
+    <div style="margin-top:auto;padding:11px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:11px;text-align:center;font-size:11px;color:#d1d5db;letter-spacing:1px;">
+      &#9112; ON-SCREEN KEYBOARD
+    </div>
+  </div>
+</div>

@@ -1,0 +1,28 @@
+<div class="tablet">
+  <div class="success-center">
+    <div class="success-icon">&#9989;</div>
+    <div class="success-title">Payment Successful!</div>
+    <div class="success-amount">$ {{ result?.amount?.toFixed(2) ?? '0.00' }}</div>
+    @if (card) {
+      <div class="success-card">charged to {{ card.maskedCardNumber }}</div>
+    }
+
+    <div class="notif-box">
+      @if (user?.email) {
+        <div class="notif-row">&#128231; Receipt &#8594; {{ user!.email }}</div>
+      }
+      @if (user?.mobile) {
+        <div class="notif-row">&#128172; SMS &#8594; {{ user!.mobile }}</div>
+      }
+      @if (result?.invoiceNumber) {
+        <div class="notif-row">&#128196; Invoice #{{ result!.invoiceNumber }}</div>
+      }
+    </div>
+
+    <div class="thanks">Thank you, {{ (user?.name ?? 'there').split(' ')[0] }}! &#128717;</div>
+    <button class="btn btn-primary" style="margin-top:4px;padding:11px;" (click)="startAgain()">
+      START AGAIN
+    </button>
+    <div class="redirect-bar">Returning to start in <strong>{{ countdown() }}s</strong>...</div>
+  </div>
+</div>

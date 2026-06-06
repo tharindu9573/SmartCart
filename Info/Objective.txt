@@ -1,0 +1,16 @@
+Objective: 
+To design and implement a smart shopping cart system using RFID technology, IoT integration, and cloud services that enables self‑checkout, eliminates long queues, and enhances the overall shopping experience for customers.
+
+Problem Statement: 
+Traditional retail checkout processes often involve long waiting lines, manual scanning of items, and dependency on cashiers. This leads to:
+
+- Customer frustration and wasted time.
+- Inefficient store operations.
+- Limited scalability during peak shopping hours.
+
+Purpose:
+- Seamless self‑checkout without cashier intervention.
+- Real‑time cart management (add/remove items instantly).
+- Faster payment processing with contactless RFID cards.
+- Improved customer satisfaction through reduced queues and convenience.
+- Enterprise scalability with analytics, inventory tracking, and cloud‑based resilience.

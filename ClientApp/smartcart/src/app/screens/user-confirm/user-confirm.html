@@ -1,0 +1,27 @@
+<div class="tablet">
+  <div class="topbar">
+    <button class="back" (click)="back()">&#8249;</button>
+    <span class="bar-title">Confirm Identity</span>
+    <span class="step-pill">3 / 3</span>
+  </div>
+
+  <div class="screen-body">
+    <div class="screen-title">Welcome back! &#128075;</div>
+    <div class="screen-sub">Is this you?</div>
+
+    @if (user) {
+      <div class="user-card">
+        <div class="user-card-row">&#128100; &nbsp;<strong>{{ user.name }}</strong></div>
+        <div class="user-card-row">&#9993; &nbsp;{{ user.email }}</div>
+      </div>
+    }
+
+    @if (error) {
+      <div class="error-banner">{{ error }}</div>
+    }
+    <button class="btn btn-success" [disabled]="loading" (click)="confirm()">
+      {{ loading ? 'Starting session...' : "YES, THAT'S ME" }}
+    </button>
+    <button class="btn btn-ghost" (click)="notMe()">NOT ME — USE DIFFERENT</button>
+  </div>
+</div>
