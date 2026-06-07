@@ -166,7 +166,8 @@ public class CartSessionController : ControllerBase
                 price = g.First().price,
                 imageUrl = g.First().imageUrl,
                 categoryName = g.First().categoryName,
-                quantity = g.Sum(i => i.quantity)
+                quantity = g.Sum(i => i.quantity),
+                uids = g.Select(i => i.uid).ToList()
             });
 
         return Ok(new

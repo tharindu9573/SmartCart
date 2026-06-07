@@ -51,7 +51,7 @@ export class UserConfirmComponent implements OnInit {
       if (existingItems && existingItems.length > 0) {
         this.state.items.set(
           existingItems.map((i: any) => ({
-            uids: Array.from({ length: i.quantity }, (_: any, idx: number) => `${i.productId}-restored-${idx}`),
+            uids: i.uids ?? Array.from({ length: i.quantity }, (_: any, idx: number) => `${i.productId}-restored-${idx}`),
             productId: i.productId,
             name: i.name,
             price: i.price,

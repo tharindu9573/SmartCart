@@ -49,7 +49,7 @@ export class ScanningComponent implements OnInit, OnDestroy {
       this.state.session.set({ sessionId: data.sessionId, cartId: environment.cartId, status: data.status });
       this.state.items.set(
         data.items.map((i: any) => ({
-          uids: Array.from({ length: i.quantity }, (_, idx) => `${i.productId}-restored-${idx}`),
+          uids: i.uids ?? Array.from({ length: i.quantity }, (_: any, idx: number) => `${i.productId}-restored-${idx}`),
           productId: i.productId,
           name: i.name,
           price: i.price,

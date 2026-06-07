@@ -141,8 +141,7 @@
               "RelativeToolTip": "SmartCart.Core\\Implementation\\Service\\Domain\\CartDomainService.cs",
               "ViewState": "AQIAAAsAAAAAAAAAAAAAwBAAAABFAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-06T06:15:13.229Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-06-06T06:15:13.229Z"
             },
             {
               "$type": "Document",
@@ -154,8 +153,7 @@
               "RelativeToolTip": "SmartCart\\Controllers\\PaymentController.cs",
               "ViewState": "AQIAACgAAAAAAAAAAAAAwHIAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-05T05:30:46.001Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-06-05T05:30:46.001Z"
             },
             {
               "$type": "Document",
@@ -191,8 +189,7 @@
               "RelativeToolTip": "SmartCart\\Controllers\\CartSessionController.cs",
               "ViewState": "AQIAAFgAAAAAAAAAAAAtwGkAAAAIAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-06T04:22:29.164Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-06-06T04:22:29.164Z"
             },
             {
               "$type": "Document",
@@ -204,8 +201,7 @@
               "RelativeToolTip": "SmartCart.Infrastructure\\Services\\NotificationService.cs",
               "ViewState": "AQIAAJ0AAAAAAAAAAAAuwK0AAAAOAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-06T06:17:37.982Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-06-06T06:17:37.982Z"
             },
             {
               "$type": "Document",
@@ -217,8 +213,7 @@
               "RelativeToolTip": "SmartCart.Core\\Implementation\\Service\\Domain\\CartSessionDomainService.cs",
               "ViewState": "AQIAACYAAAAAAAAAAAAtwDcAAAAIAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-06-06T09:41:35.7Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-06-06T09:41:35.7Z"
             },
             {
               "$type": "Document",
@@ -228,7 +223,7 @@
               "RelativeDocumentMoniker": "SmartCart\\Program.cs",
               "ToolTip": "C:\\Users\\thari\\OneDrive\\Pictures\\Documents\\MSc AI Course Materials\\SmartCartGit\\SmartCart\\SmartCart\\SmartCart\\Program.cs",
               "RelativeToolTip": "SmartCart\\Program.cs",
-              "ViewState": "AQIAAI0AAAAAAAAAAAAIwJ4AAAAAAAAA",
+              "ViewState": "AQIAAAwAAAAAAAAAAAAIwJwAAAAiAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-06-05T04:27:00.012Z",
               "EditorCaption": ""
