@@ -3,6 +3,10 @@
 #include <SPI.h>
 #include <MFRC522.h>
 #include <WiFiClientSecure.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+#include <unordered_map>
 
 // Root CA (same as before)
 const char *digicertRootCA = R"EOF(
@@ -52,8 +56,33 @@ MFRC522 rfid1(SS_PIN1, RST_PIN1);
 #define RST_PIN2 21
 MFRC522 rfid2(SS_PIN2, RST_PIN2);
 
+// Speaker
+#define SPEAKER_PIN 16
+
+// LED
+#define SCANNER_LED_PIN 2
+#define PAYMENT_LED_PIN 4
+
+// Display
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+
 void setup()
 {
+  pinMode(SPEAKER_PIN, OUTPUT);
+  pinMode(SCANNER_LED_PIN, OUTPUT);
+  pinMode(PAYMENT_LED_PIN, OUTPUT);
+
+  Wire.begin(21, 22);
+
+  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C))
+  {
+    Serial.println(F("SSD1306 allocation failed"));
+    for (;;)
+      ;
+  }
+
   Serial.begin(115200);
   WiFi.begin(ssid, password);
 
@@ -71,6 +100,11 @@ void setup()
   SPI.begin();
   rfid1.PCD_Init();
   rfid2.PCD_Init();
+
+  display.setTextSize(2);
+  display.setTextColor(SSD1306_WHITE);
+  display.clearDisplay();
+  Serial.println("Setup is done");
 }
 
 void reconnect()
@@ -100,7 +134,35 @@ String getUid(MFRC522 &reader)
     uidStr += ":";
     uidStr += String(reader.uid.uidByte[i], HEX);
   }
+
+  uidStr.toUpperCase();
   return uidStr;
+}
+
+String getProductName(const String &uid)
+{
+  struct Entry
+  {
+    const char *uid;
+    const char *name;
+  };
+
+  static const Entry productMap[] = {
+      {"04:11:22:33:44:55:66", "Sparkling Water 1.5L"},
+      {"11:22:33:44", "Brown Bread Loaf"},
+      {"55:66:77:88", "Free Range Eggs (12)"},
+      {"AA:BB:CC:DD", "Cola 330ml Can"},
+      {"C0:FF:EE:99", "Orange Juice 1L"},
+      {"DE:AD:BE:EF", "Cola 330ml Can"}};
+
+  for (auto &entry : productMap)
+  {
+    if (uid == entry.uid)
+    {
+      return String(entry.name);
+    }
+  }
+  return "Unknown Product";
 }
 
 void loop()
@@ -111,11 +173,19 @@ void loop()
   }
   client.loop();
 
-  // Reader 1 → Azure IoT Hub
+  display.setCursor(0, 0);
+
+  // Reader 1 → Azure IoT Hub - For Product Scan
   if (rfid1.PICC_IsNewCardPresent() && rfid1.PICC_ReadCardSerial())
   {
+    digitalWrite(SCANNER_LED_PIN, HIGH);
+    tone(SPEAKER_PIN, 500, 400);
+
     String uidStr = getUid(rfid1);
     Serial.println("Reader1 UID: " + uidStr);
+
+    display.println(getProductName(uidStr));
+    display.display();
 
     String payload = "{";
     payload += "\"Uid\":\"" + uidStr + "\",";
@@ -129,13 +199,25 @@ void loop()
 
     rfid1.PICC_HaltA();
     rfid1.PCD_StopCrypto1();
+
+    delay(750);
+    display.clearDisplay();
+    display.display();
+    digitalWrite(SCANNER_LED_PIN, LOW);
+    noTone(SPEAKER_PIN);
   }
 
-  // Reader 2 → Local API
+  // Reader 2 → Azure IoT Hub - For Payments
   if (rfid2.PICC_IsNewCardPresent() && rfid2.PICC_ReadCardSerial())
   {
+    digitalWrite(PAYMENT_LED_PIN, HIGH);
+    tone(SPEAKER_PIN, 500, 400);
+
     String uidStr = getUid(rfid2);
     Serial.println("Reader2 UID: " + uidStr);
+
+    display.println("Contactless Payment");
+    display.display();
 
     String payload = "{";
     payload += "\"Uid\":\"" + uidStr + "\",";
@@ -149,6 +231,12 @@ void loop()
 
     rfid2.PICC_HaltA();
     rfid2.PCD_StopCrypto1();
+
+    delay(750);
+    display.clearDisplay();
+    display.display();
+    digitalWrite(PAYMENT_LED_PIN, LOW);
+    noTone(SPEAKER_PIN);
   }
 
   delay(50);
