@@ -55,4 +55,4 @@ claude.config
 claude.log
 claude-output/
 .claude
-*.vs/
+*.vs
